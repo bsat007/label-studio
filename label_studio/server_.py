@@ -32,10 +32,36 @@ from label_studio.utils.validation import TaskValidator
 from label_studio.utils.exceptions import ValidationError
 from label_studio.utils.functions import generate_sample_task_without_check
 from label_studio.utils.misc import exception_treatment, config_line_stripped, get_config_templates
-from label_studio.utils.argparser import parse_input_args
+
+# input arguments
+import argparse
+parser = argparse.ArgumentParser(description='Label studio')
+input_args = parser.parse_args()
+input_args.command='start'
+input_args.config_path=None
+input_args.debug=None
+input_args.force=False
+input_args.init=False
+input_args.input_format='json'
+input_args.input_path=None
+input_args.debug=None
+input_args.label_config = None
+input_args.log_level = None
+input_args.ml_backend_name = None
+input_args.ml_backend_url = None
+input_args.no_browser=False
+input_args.output_dir = None
+input_args.port=8200
+input_args.project_name='labelling_project'
+input_args.root_dir='.'
+input_args.sampling='uniform'
+input_args.template = None
+input_args.verbose = None
 
 from label_studio.project import Project
 from label_studio.tasks import Tasks
+
+import label_studio.utils.functions
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +69,7 @@ app = flask.Flask(__name__, static_url_path='')
 app.secret_key = 'A0Zrdqwf1AQWj12ajkhgFN]dddd/,?RfDWQQT'
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-# input arguments
-input_args = None
+label_studio.utils.functions.HOSTNAME = 'http://localhost:' + str(input_args.port)
 
 
 def project_get_or_create(multi_session_force_recreate=False):
@@ -633,52 +658,5 @@ def get_data_file(filename):
     directory = request.args.get('d')
     return flask.send_from_directory(directory, filename, as_attachment=True)
 
-
-def main():
-    import threading
-    import webbrowser
-
-    global input_args
-
-    input_args = parse_input_args()
-
-    # setup logging level
-    if input_args.log_level:
-        logging.root.setLevel(input_args.log_level)
-
-    import label_studio.utils.functions
-    label_studio.utils.functions.HOSTNAME = 'http://localhost:' + str(input_args.port)
-
-    # On `init` command, create directory args.project_name with initial project state and exit
-    if input_args.command == 'init':
-        Project.create_project_dir(input_args.project_name, input_args)
-        return
-
-    elif input_args.command == 'start':
-
-        # If `start --init` option is specified, do the same as with `init` command, but continue to run app
-        if input_args.init:
-            Project.create_project_dir(input_args.project_name, input_args)
-
-        if not os.path.exists(Project.get_project_dir(input_args.project_name, input_args)):
-            raise FileNotFoundError(
-                'Project directory "{pdir}" not found. '
-                'Did you miss create it first with `label-studio init {pdir}` ?'.format(
-                    pdir=Project.get_project_dir(input_args.project_name, input_args)))
-
-    # On `start` command, launch browser if --no-browser is not specified and start label studio server
-    if input_args.command == 'start':
-        if not input_args.no_browser:
-            browser_url = label_studio.utils.functions.HOSTNAME + '/welcome'
-            threading.Timer(2.5, lambda: webbrowser.open(browser_url)).start()
-            print('Start browser at URL: ' + browser_url)
-
-        app.run(host='0.0.0.0', port=input_args.port, debug=input_args.debug)
-
-    # On `start-multi-session` command, server creates one project per each browser sessions
-    elif input_args.command == 'start-multi-session':
-        app.run(host='0.0.0.0', port=input_args.port, debug=input_args.debug)
-
-
 if __name__ == "__main__":
-    main()
+    app.run(host='0.0.0.0', port=input_args.port, debug=input_args.debug)
