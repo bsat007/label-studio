@@ -51,7 +51,7 @@ input_args.ml_backend_name = None
 input_args.ml_backend_url = None
 input_args.no_browser=False
 input_args.output_dir = None
-input_args.port=8200
+input_args.port=5000
 input_args.project_name='labelling_project'
 input_args.root_dir='.'
 input_args.sampling='uniform'
@@ -69,7 +69,7 @@ app = flask.Flask(__name__, static_url_path='')
 app.secret_key = 'A0Zrdqwf1AQWj12ajkhgFN]dddd/,?RfDWQQT'
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-label_studio.utils.functions.HOSTNAME = 'http://localhost:' + str(input_args.port)
+label_studio.utils.functions.HOSTNAME = '127.0.0.1:' + str(input_args.port)
 
 
 def project_get_or_create(multi_session_force_recreate=False):
@@ -657,6 +657,3 @@ def get_data_file(filename):
     """
     directory = request.args.get('d')
     return flask.send_from_directory(directory, filename, as_attachment=True)
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=input_args.port, debug=input_args.debug)
