@@ -15,7 +15,7 @@ Jinja2==2.10.3
 jsonschema==3.2.0
 label-studio==0.5.1
 label-studio-converter==0.0.12
-lxml==4.5.0
+lxml==4.6.3
 MarkupSafe==1.1.1
 mixpanel==4.4.0
 numpy==1.17.4
