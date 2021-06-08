@@ -21,7 +21,7 @@ mixpanel==4.4.0
 numpy==1.17.4
 orjson==2.6.5
 pandas==0.22.0
-Pillow==6.2.1
+Pillow==8.2.0
 pyrsistent==0.16.0
 python-dateutil==2.8.1
 pytz==2019.3
